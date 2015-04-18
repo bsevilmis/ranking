@@ -1,6 +1,9 @@
-function [old, new, mergeRule] = myPart2Index()
+function [old, new, mergeRule, names] = myPart2Index()
 % Define the part index of each objects. 
 
+names = {'aeroplane','bicycle','bird','boat','bottle','bus','car','cat',...
+    'chair','cow','table','dog','horse','motorbike','person','pottedplant',...
+    'sheep','sofa','train','tvmonitor'};
 
 %************** OLD(ORIGINAL) DEFINITION***************************%
 old = cell(20, 1);                    
@@ -496,8 +499,8 @@ birdMergedParts(7).rule = {[cell2mat(values(old{3},{'head'})) cell2mat(values(ol
 birdMergedParts(8).name = 'nt';
 birdMergedParts(8).rule = {[cell2mat(values(old{3},{'neck'})) cell2mat(values(old{3},{'torso'}))]};
 
-birdMergedParts(8).name = 'tlf';
-birdMergedParts(8).rule = {[cell2mat(values(old{3},{'torso'})) cell2mat(values(old{3},{'lleg'})) cell2mat(values(old{3},{'lfoot'}))];...
+birdMergedParts(9).name = 'tlf';
+birdMergedParts(9).rule = {[cell2mat(values(old{3},{'torso'})) cell2mat(values(old{3},{'lleg'})) cell2mat(values(old{3},{'lfoot'}))];...
     [cell2mat(values(old{3},{'torso'})) cell2mat(values(old{3},{'rleg'})) cell2mat(values(old{3},{'rfoot'}))]};
 % CAT
 catMergedParts(1).name = 'head';

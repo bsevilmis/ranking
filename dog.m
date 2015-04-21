@@ -1,39 +1,39 @@
-function varargout = bird(varargin)
-% BIRD MATLAB code for bird.fig
-%      BIRD, by itself, creates a new BIRD or raises the existing
+function varargout = dog(varargin)
+%DOG M-file for dog.fig
+%      DOG, by itself, creates a new DOG or raises the existing
 %      singleton*.
 %
-%      H = BIRD returns the handle to a new BIRD or the handle to
+%      H = DOG returns the handle to a new DOG or the handle to
 %      the existing singleton*.
 %
-%      BIRD('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in BIRD.M with the given input arguments.
+%      DOG('Property','Value',...) creates a new DOG using the
+%      given property value pairs. Unrecognized properties are passed via
+%      varargin to dog_OpeningFcn.  This calling syntax produces a
+%      warning when there is an existing singleton*.
 %
-%      BIRD('Property','Value',...) creates a new BIRD or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before bird_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to bird_OpeningFcn via varargin.
+%      DOG('CALLBACK') and DOG('CALLBACK',hObject,...) call the
+%      local function named CALLBACK in DOG.M with the given input
+%      arguments.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help bird
+% Edit the above text to modify the response to help dog
 
-% Last Modified by GUIDE v2.5 21-Apr-2015 17:32:43
+% Last Modified by GUIDE v2.5 21-Apr-2015 18:12:10
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @bird_OpeningFcn, ...
-                   'gui_OutputFcn',  @bird_OutputFcn, ...
-                   'gui_LayoutFcn',  [] , ...
+                   'gui_OpeningFcn', @dog_OpeningFcn, ...
+                   'gui_OutputFcn',  @dog_OutputFcn, ...
+                   'gui_LayoutFcn',  [], ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
-    gui_State.gui_Callback = str2func(varargin{1});
+   gui_State.gui_Callback = str2func(varargin{1});
 end
 
 if nargout
@@ -44,20 +44,21 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before bird is made visible.
-function bird_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before dog is made visible.
+function dog_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to bird (see VARARGIN)
+% varargin   unrecognized PropertyName/PropertyValue pairs from the
+%            command line (see VARARGIN)
 
 [old, new, mergeRule, names] = myPart2Index();
-user.parts = keys(new{3});
+user.parts = keys(new{12});
 user.ranking = zeros(1,numel(user.parts));
 handles.user = user;
 
-imshow(imread('./dataSets/trainval/guiVisuals/birdModified.png'));
+imshow(imread('./dataSets/trainval/guiVisuals/dogModified.png'));
 
 % Choose default command line output for bird
 handles.output = hObject;
@@ -65,12 +66,12 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes bird wait for user response (see UIRESUME)
-% uiwait(handles.birdGui);
+% UIWAIT makes dog wait for user response (see UIRESUME)
+% uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = bird_OutputFcn(hObject, eventdata, handles) 
+function varargout = dog_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -152,14 +153,13 @@ end
 
 
 % --- Executes on selection change in headNeckTorsoRanking.
-function wingRanking_Callback(hObject, eventdata, handles)
+function headNeckTorsoRanking_Callback(hObject, eventdata, handles)
 % hObject    handle to headNeckTorsoRanking (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns headNeckTorsoRanking contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from headNeckTorsoRanking
-
 contents = cellstr(get(hObject,'String'));
 rankString = contents{get(hObject,'Value')};
 if(strcmp(rankString,''))
@@ -167,7 +167,7 @@ if(strcmp(rankString,''))
 else
     rank = str2num(rankString);
 end
-[~,ind] = ismember('wing',handles.user.parts);
+[~,ind] = ismember('hnt',handles.user.parts);
 handles.user.ranking(1,ind) = rank;
 %handles.user
 % Update handles structure
@@ -175,7 +175,7 @@ guidata(hObject, handles);
 
 
 % --- Executes during object creation, after setting all properties.
-function wingRanking_CreateFcn(hObject, eventdata, handles)
+function headNeckTorsoRanking_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to headNeckTorsoRanking (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
@@ -195,7 +195,6 @@ function tailTorsoRanking_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns tailTorsoRanking contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from tailTorsoRanking
-
 contents = cellstr(get(hObject,'String'));
 rankString = contents{get(hObject,'Value')};
 if(strcmp(rankString,''))
@@ -231,7 +230,6 @@ function headRanking_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns headRanking contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from headRanking
-
 contents = cellstr(get(hObject,'String'));
 rankString = contents{get(hObject,'Value')};
 if(strcmp(rankString,''))
@@ -259,15 +257,14 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on selection change in legFootRanking.
-function legFootRanking_Callback(hObject, eventdata, handles)
-% hObject    handle to legFootRanking (see GCBO)
+% --- Executes on selection change in legPawRanking.
+function legPawRanking_Callback(hObject, eventdata, handles)
+% hObject    handle to legPawRanking (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns legFootRanking contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from legFootRanking
-
+% Hints: contents = cellstr(get(hObject,'String')) returns legPawRanking contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from legPawRanking
 contents = cellstr(get(hObject,'String'));
 rankString = contents{get(hObject,'Value')};
 if(strcmp(rankString,''))
@@ -275,7 +272,7 @@ if(strcmp(rankString,''))
 else
     rank = str2num(rankString);
 end
-[~,ind] = ismember('lf',handles.user.parts);
+[~,ind] = ismember('lp',handles.user.parts);
 handles.user.ranking(1,ind) = rank;
 %handles.user
 % Update handles structure
@@ -283,8 +280,8 @@ guidata(hObject, handles);
 
 
 % --- Executes during object creation, after setting all properties.
-function legFootRanking_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to legFootRanking (see GCBO)
+function legPawRanking_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to legPawRanking (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -295,15 +292,14 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on selection change in torsoLegFootRanking.
-function torsoLegFootRanking_Callback(hObject, eventdata, handles)
-% hObject    handle to torsoLegFootRanking (see GCBO)
+% --- Executes on selection change in torsoLegPawRanking.
+function torsoLegPawRanking_Callback(hObject, eventdata, handles)
+% hObject    handle to torsoLegPawRanking (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: contents = cellstr(get(hObject,'String')) returns torsoLegFootRanking contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from torsoLegFootRanking
-
+% Hints: contents = cellstr(get(hObject,'String')) returns torsoLegPawRanking contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from torsoLegPawRanking
 contents = cellstr(get(hObject,'String'));
 rankString = contents{get(hObject,'Value')};
 if(strcmp(rankString,''))
@@ -311,7 +307,7 @@ if(strcmp(rankString,''))
 else
     rank = str2num(rankString);
 end
-[~,ind] = ismember('tlf',handles.user.parts);
+[~,ind] = ismember('tlp',handles.user.parts);
 handles.user.ranking(1,ind) = rank;
 %handles.user
 % Update handles structure
@@ -319,8 +315,8 @@ guidata(hObject, handles);
 
 
 % --- Executes during object creation, after setting all properties.
-function torsoLegFootRanking_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to torsoLegFootRanking (see GCBO)
+function torsoLegPawRanking_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to torsoLegPawRanking (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -339,7 +335,6 @@ function tailRanking_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns tailRanking contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from tailRanking
-
 contents = cellstr(get(hObject,'String'));
 rankString = contents{get(hObject,'Value')};
 if(strcmp(rankString,''))
@@ -375,7 +370,6 @@ function neckTorsoRanking_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns neckTorsoRanking contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from neckTorsoRanking
-
 contents = cellstr(get(hObject,'String'));
 rankString = contents{get(hObject,'Value')};
 if(strcmp(rankString,''))
@@ -403,42 +397,6 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on selection change in headNeckTorsoRanking.
-function headNeckTorsoRanking_Callback(hObject, eventdata, handles)
-% hObject    handle to headNeckTorsoRanking (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns headNeckTorsoRanking contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from headNeckTorsoRanking
-
-contents = cellstr(get(hObject,'String'));
-rankString = contents{get(hObject,'Value')};
-if(strcmp(rankString,''))
-    rank = 0;
-else
-    rank = str2num(rankString);
-end
-[~,ind] = ismember('hnt',handles.user.parts);
-handles.user.ranking(1,ind) = rank;
-%handles.user
-% Update handles structure
-guidata(hObject, handles);
-
-
-% --- Executes during object creation, after setting all properties.
-function headNeckTorsoRanking_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to headNeckTorsoRanking (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
 % --- Executes on button press in saveButton.
 function saveButton_Callback(hObject, eventdata, handles)
 % hObject    handle to saveButton (see GCBO)
@@ -455,7 +413,7 @@ else
         warndlg('ERROR: Duplicate ranks given...');
     else
         % count existing files
-        folderPrefix = './dataSets/trainval/humanRanks/bird/%s';
+        folderPrefix = './dataSets/trainval/humanRanks/dog/%s';
         currentFileNumber = numel(dir(sprintf(folderPrefix,'*.mat')));
         user = handles.user;
         save(sprintf(folderPrefix,[num2str(currentFileNumber+1) '.mat']),...
@@ -467,5 +425,5 @@ end
 if(flag)
     clearString = 'clear';
     evalin('base',clearString);
-    delete(handles.birdGui);
+    delete(handles.catGui);
 end

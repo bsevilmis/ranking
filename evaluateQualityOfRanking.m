@@ -32,157 +32,179 @@ outputDirectory = '/home/berksevilmis/workspace/proposalRankingProject/dataSets/
 subsetBirdImagesDirectory = '/home/berksevilmis/workspace/proposalRankingProject/dataSets/subsetBirds/';
 subsetBirdImagesFolder = dir(subsetBirdImagesDirectory);
 
-% set outputs
-SS = [];
-HH = [];
-HS = [];
-SH = [];
-
-% set image counter
-imageCounter = 0;
-
 % generate results
 for i = 3:length(subsetBirdImagesFolder)
-    imageCounter = imageCounter + 1;
+    try
     subInputDirectory = [subsetBirdImagesDirectory subsetBirdImagesFolder(i).name];
     subFolder = dir(subInputDirectory);
     
-    for imageIndices = 3:length(subFolder)
-        [~, name, ext] = fileparts(subFolder(imageIndices).name);
-        if(strcmp(ext,'.jpg'))
-            % read image
-            image = imread([subInputDirectory '/' subFolder(imageIndices).name]);
-            % read ground truth
-            gtImage = imread([subInputDirectory '/' name '.png']);
-            
-            %  CPMC
-            cd './cpmcRelease';     % this is due to cpmc bad coding style,...
-                                    % has hard coded paths inside such as './' assuming
-                                    % current directory is already cpmcRelease
-            img_name = name;
-            diversify_const = 0.75;
-            segm_pars = [];
-            imwrite(image, [exp_dir 'JPEGImages/' img_name ext]);
- 
-            % delete previously calculated data
-            deletionFlags = ones(1,9);
-            cleanPreviuoslyStoredData(exp_dir, img_name, deletionFlags);
-             
-            [masks, img_name, segm_pars, ranker_file, exp_dir, diversify_const] =...
-                cpmcProposalGenerator(exp_dir, img_name, diversify_const, segm_pars);
-            [rankedMasks, scores] = cpmcRanker(masks, img_name, segm_pars,...
-                ranker_file, exp_dir, diversify_const);
-            
-            % calculate jaccard index values
-            jiArray = zeros(1,size(rankedMasks,3));
-            for k = 1:size(jiArray,2)
-                region = rankedMasks(:,:,k);
-                jiValue = nnz(logical(region) & logical(gtImage)) / ...
-                    nnz(logical(region) | logical(gtImage));
-                jiArray(k) = jiValue;
-            end
-            
-            % save results under SS
-            SS(imageCounter).jaccardIndexArray = jiArray;
-            SS(imageCounter).bestJaccardIndex = max(jiArray);
-            SS(imageCounter).name = name;
-            
-            % HOIEM
-            cd '../'
-            [image_data, proposals, function_root, superpixels] = ...
-                hoiemProposalGenerator(image);
-            ranked_regions = ...
-                hoiemRanker(image_data, proposals, function_root);
-            
-            % calculate jaccard index values
-            masksHoiem = false(size(image,1),size(image,2),...
-                length(ranked_regions));
-            jiArray = zeros(1,length(ranked_regions));
-            for k = 1:size(jiArray,2)
-                region = ismember(superpixels,ranked_regions{k});
-                masksHoiem(:,:,k) = logical(region);
-                jiValue = nnz(logical(region) & logical(gtImage)) / ...
-                    nnz(logical(region) | logical(gtImage));
-                jiArray(k) = jiValue;
-            end
-            
-            % save results under HH
-            HH(imageCounter).jaccardIndexArray = jiArray;
-            HH(imageCounter).bestJaccardIndex = max(jiArray);
-            HH(imageCounter).name = name;
-            
-            % hoiem regions / cpmc ranker
-            % replace MySegmentsMat by new masks
-            dum.('masks') = masksHoiem;
-            save([exp_dir 'MySegmentsMat/'  'dummy_masks' '/' img_name '.mat'], '-struct', 'dum', 'masks');
-            
-            %delete previously calculated data
-            deletionFlags = [1 1 1 1 1 1 0 0 0];
-            cleanPreviuoslyStoredData(exp_dir, img_name, deletionFlags);
-            
-            [rankedMasksHoiem, scores] = cpmcRanker(masksHoiem, img_name, segm_pars,...
-                ranker_file, exp_dir, diversify_const);
-            
-            % calculate jaccard index values
-            jiArray = zeros(1,length(rankedMasksHoiem));
-            for k = 1:size(jiArray,2)
-                region = rankedMasksHoiem(:,:,k);
-                jiValue = nnz(logical(region) & logical(gtImage)) / ...
-                    nnz(logical(region) | logical(gtImage));
-                jiArray(k) = jiValue;
-            end
-            
-            % save results under HS
-            HS(imageCounter).jaccardIndexArray = jiArray;
-            HS(imageCounter).bestJaccardIndex = max(jiArray);
-            HS(imageCounter).name = name;
-            
-            % cpmc regions / hoiem ranker
-            proposalsCPMC = cell(size(masks,3),1);
-            intersectionThreshold = 0.75;
-            for k = 1:size(masks,3)
-                region = logical(masks(:,:,k));
-                uniqueSuperpixelIndices = unique(superpixels(region));
-                for l = 1:length(uniqueSuperpixelIndices)
-                    superpixelArea = ...
-                        nnz(superpixels == uniqueSuperpixelIndices(l));
-                    if( nnz(superpixels == uniqueSuperpixelIndices(l)...
-                            & region) / superpixelArea >= intersectionThreshold)
-                         proposalsCPMC{k} = [proposalsCPMC{k} ...
-                             uniqueSuperpixelIndices(l)];
+    if(isempty(dir([subInputDirectory '/*.mat'])))
+        
+        % set outputs
+        SS = [];
+        HH = [];
+        HS = [];
+        SH = [];
+    
+        for imageIndices = 3:length(subFolder)
+            [~, name, ext] = fileparts(subFolder(imageIndices).name);
+            if(strcmp(ext,'.jpg'))
+                % read image
+                image = imread([subInputDirectory '/' subFolder(imageIndices).name]);
+                % read ground truth
+                gtImage = imread([subInputDirectory '/' name '.png']);
+                
+                %  CPMC
+                cd './cpmcRelease';     % this is due to cpmc bad coding style,...
+                % has hard coded paths inside such as './' assuming
+                % current directory is already cpmcRelease
+                img_name = name;
+                diversify_const = 0.75;
+                segm_pars = [];
+                imwrite(image, [exp_dir 'JPEGImages/' img_name ext]);
+                
+                % delete previously calculated data
+                deletionFlags = ones(1,9);
+                cleanPreviuoslyStoredData(exp_dir, img_name, deletionFlags);
+                
+                [masks, img_name, segm_pars, ranker_file, exp_dir, diversify_const] =...
+                    cpmcProposalGenerator(exp_dir, img_name, diversify_const, segm_pars);
+                [rankedMasks, scores] = cpmcRanker(masks, img_name, segm_pars,...
+                    ranker_file, exp_dir, diversify_const);
+                
+                % calculate jaccard index values
+                jiArray = zeros(1,size(rankedMasks,3));
+                for k = 1:size(jiArray,2)
+                    region = rankedMasks(:,:,k);
+                    jiValue = nnz(logical(region) & logical(gtImage)) / ...
+                        nnz(logical(region) | logical(gtImage));
+                    jiArray(k) = jiValue;
+                end
+                
+                % save results under SS
+                SS.jaccardIndexArray = jiArray;
+                SS.bestJaccardIndex = max(jiArray);
+                SS.name = name;
+                
+                % HOIEM
+                cd '../'
+                [image_data, proposals, function_root, superpixels] = ...
+                    hoiemProposalGenerator(image);
+                ranked_regions = ...
+                    hoiemRanker(image_data, proposals, function_root);
+                
+                % calculate jaccard index values
+                masksHoiem = false(size(image,1),size(image,2),...
+                    length(ranked_regions));
+                jiArray = zeros(1,length(ranked_regions));
+                for k = 1:size(jiArray,2)
+                    region = ismember(superpixels,ranked_regions{k});
+                    masksHoiem(:,:,k) = logical(region);
+                    jiValue = nnz(logical(region) & logical(gtImage)) / ...
+                        nnz(logical(region) | logical(gtImage));
+                    jiArray(k) = jiValue;
+                end
+                
+                % save results under HH
+                HH.jaccardIndexArray = jiArray;
+                HH.bestJaccardIndex = max(jiArray);
+                HH.name = name;
+                
+                % hoiem regions / cpmc ranker
+                % replace MySegmentsMat by new masks
+                dum.('masks') = masksHoiem;
+                save([exp_dir 'MySegmentsMat/'  'dummy_masks' '/' img_name '.mat'], '-struct', 'dum', 'masks');
+                
+                %delete previously calculated data
+                deletionFlags = [1 1 1 1 1 1 0 0 0];
+                cleanPreviuoslyStoredData(exp_dir, img_name, deletionFlags);
+                
+                [rankedMasksHoiem, scores] = cpmcRanker(masksHoiem, img_name, segm_pars,...
+                    ranker_file, exp_dir, diversify_const);
+                
+                % calculate jaccard index values
+                jiArray = zeros(1,length(rankedMasksHoiem));
+                for k = 1:size(jiArray,2)
+                    region = rankedMasksHoiem(:,:,k);
+                    jiValue = nnz(logical(region) & logical(gtImage)) / ...
+                        nnz(logical(region) | logical(gtImage));
+                    jiArray(k) = jiValue;
+                end
+                
+                % save results under HS
+                HS.jaccardIndexArray = jiArray;
+                HS.bestJaccardIndex = max(jiArray);
+                HS.name = name;
+                
+                % cpmc regions / hoiem ranker
+                proposalsCPMC = cell(size(masks,3),1);
+                intersectionThreshold = 0.75;
+                for k = 1:size(masks,3)
+                    region = logical(masks(:,:,k));
+                    uniqueSuperpixelIndices = unique(superpixels(region));
+                    for l = 1:length(uniqueSuperpixelIndices)
+                        superpixelArea = ...
+                            nnz(superpixels == uniqueSuperpixelIndices(l));
+                        if( nnz(superpixels == uniqueSuperpixelIndices(l)...
+                                & region) / superpixelArea >= intersectionThreshold)
+                            proposalsCPMC{k} = [proposalsCPMC{k} ...
+                                uniqueSuperpixelIndices(l)];
+                        end
+                    end
+                    proposalsCPMC{k} = double(proposalsCPMC{k});
+                    disp([num2str(k) '/' num2str(size(masks,3)) ' done..']);
+                end
+                
+                % now some proposals dont satisfy intersectionThreshold
+                % criteria and end up being [], we need to remove them
+                % otherwise feature extraction generates error
+                successfulIndices = [];
+                for k = 1:length(proposalsCPMC)
+                    if(~isempty(proposalsCPMC{k}))
+                        successfulIndices = [successfulIndices k];
                     end
                 end
-                proposalsCPMC{k} = double(proposalsCPMC{k});
-                disp([num2str(k) '/' num2str(size(masks,3)) ' done..']);
+                proposalsCPMC = proposalsCPMC(successfulIndices);
+                
+                ranked_regionsCPMC = ...
+                    hoiemRanker(image_data, proposalsCPMC, function_root);
+                
+                % calculate jaccard index values
+                jiArray = zeros(1,length(ranked_regionsCPMC));
+                for k = 1:size(jiArray,2)
+                    region = ismember(superpixels,ranked_regionsCPMC{k});
+                    jiValue = nnz(logical(region) & logical(gtImage)) / ...
+                        nnz(logical(region) | logical(gtImage));
+                    jiArray(k) = jiValue;
+                end
+                
+                % save results under SH
+                SH.jaccardIndexArray = jiArray;
+                SH.bestJaccardIndex = max(jiArray);
+                SH.name = name;
+                
+                disp([name ' ..done']);
+                
+                save([outputDirectory subsetBirdImagesFolder(i).name '/SS.mat'],'SS');
+                save([outputDirectory subsetBirdImagesFolder(i).name '/HH.mat'],'HH');
+                save([outputDirectory subsetBirdImagesFolder(i).name '/HS.mat'],'HS');
+                save([outputDirectory subsetBirdImagesFolder(i).name '/SH.mat'],'SH');
+                
+                
             end
-            
-            ranked_regionsCPMC = ...
-                hoiemRanker(image_data, proposalsCPMC, function_root);
-            
-            % calculate jaccard index values
-            jiArray = zeros(1,length(ranked_regionsCPMC));
-            for k = 1:size(jiArray,2)
-                region = ismember(superpixels,ranked_regionsCPMC{k});
-                jiValue = nnz(logical(region) & logical(gtImage)) / ...
-                    nnz(logical(region) | logical(gtImage));
-                jiArray(k) = jiValue;
-            end
-            
-            % save results under SH
-            SH(imageCounter).jaccardIndexArray = jiArray;
-            SH(imageCounter).bestJaccardIndex = max(jiArray);
-            SH(imageCounter).name = name;
-            
-            disp([name ' ..done']);
         end
+    end
+    catch exception
+        disp('Should never have happened...');
+        continue;
     end
 end
 
-%save results
-save([outputDirectory '/SS.mat'],'SS');
-save([outputDirectory '/HH.mat'],'SS');
-save([outputDirectory '/HS.mat'],'SS');
-save([outputDirectory '/SH.mat'],'SS');
+% %save results
+% save([outputDirectory '/SS.mat'],'SS');
+% save([outputDirectory '/HH.mat'],'SS');
+% save([outputDirectory '/HS.mat'],'SS');
+% save([outputDirectory '/SH.mat'],'SS');
 
 end
 
